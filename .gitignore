@@ -1,0 +1,8 @@
+.claude/
+.DS_Store
+node_modules/
+*.log
+_build_pages.py
+*.ceu.json
+_v.html
+_cur/
