@@ -6,7 +6,29 @@ document.addEventListener('DOMContentLoaded', () => {
   initSmoothClose();
   initWoodShine();
   initWizard();
+  initEstimateModal();
 });
+
+function initEstimateModal() {
+  const modal = document.getElementById('estimateModal');
+  if (!modal) return;
+  const open = () => { modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('emodal-open'); };
+  const close = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); document.body.classList.remove('emodal-open'); };
+  modal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', close));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+  const isCTA = (a) => {
+    const href = a.getAttribute('href') || '';
+    if (href.indexOf('tel:') === 0 || href.indexOf('mailto:') === 0) return false;
+    const t = (a.textContent || '').toLowerCase();
+    return /\/contact\/?(#estimate)?$/.test(href) || /#estimate$/.test(href) ||
+           /estimate|request a|request your|free quote|get a quote|price your/.test(t);
+  };
+  document.querySelectorAll('a.btn, a.svc__tag, a.mobar__est').forEach(a => {
+    if (a.closest('.emodal') || a.closest('.wizard')) return; // nunca os botoes internos do form
+    if (isCTA(a)) a.addEventListener('click', e => { e.preventDefault(); open(); });
+  });
+}
 
 function initWizard() {
   document.querySelectorAll('.wizard').forEach(wz => {

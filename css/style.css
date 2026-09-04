@@ -148,7 +148,29 @@ p{font-size:clamp(.98rem,1.4vw,1.08rem)}
 .guarantee__badge{width:74px;height:74px;margin:0 auto 24px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.35)}
 .guarantee__badge svg{width:36px;height:36px;color:#fff}
 .guarantee h2{margin-bottom:16px}
-.guarantee p{max-width:640px;margin:0 auto;color:#fdeee3;font-size:1.08rem}
+.guarantee p{max-width:660px;margin:0 auto;color:#fdeee3;font-size:1.08rem}
+/* selo de garantia */
+.seal{width:132px;height:132px;margin:0 auto 26px;filter:drop-shadow(0 10px 22px rgba(0,0,0,.28))}
+.seal__ring{width:100%;height:100%;border-radius:50%;padding:7px;
+  background:conic-gradient(from 0deg,#FBBC04 0 8deg,#E7A302 8deg 16deg);
+  -webkit-mask:radial-gradient(circle at center,transparent 0,transparent 0);mask:none;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 0 0 3px rgba(255,255,255,.55)}
+.seal__inner{width:100%;height:100%;border-radius:50%;background:linear-gradient(160deg,#fff,#FFF3E0);
+  color:var(--terra-600);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  border:2px solid #fff;position:relative}
+.seal__inner b{font-size:1.7rem;line-height:1;font-weight:900}
+.seal__inner span{font-size:.62rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;text-align:center;line-height:1.15;color:var(--espresso)}
+.seal__inner svg{width:16px;height:16px;color:#2E7D32;margin-top:3px}
+/* faixa de licenca / seguro */
+.guarantee__trust{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:900px;margin:34px auto 0}
+.gtrust{display:flex;flex-direction:column;align-items:center;gap:9px;padding:20px 12px;border-radius:14px;
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);text-align:center}
+.gtrust svg{width:30px;height:30px;color:#fff;opacity:.95}
+.gtrust span{font-size:.82rem;color:#fdeee3;line-height:1.4}
+.gtrust span b{display:block;color:#fff;font-size:.9rem;margin-top:2px}
+@media(max-width:820px){.guarantee__trust{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:460px){.guarantee__trust{grid-template-columns:1fr}}
 
 /* ===== Proof / Before-After ===== */
 .proof{padding:var(--py) 0;background:var(--bg-light)}
@@ -539,3 +561,41 @@ h3{font-weight:700;text-transform:none;letter-spacing:0}
 
 /* hero em 3 linhas limpas */
 .br-m{display:inline}
+
+/* ===== Google reviews ===== */
+.grev{background:var(--bg-light);padding:88px 0}
+.gicon{width:22px;height:22px;flex-shrink:0}
+.grev__summary{display:flex;align-items:center;gap:18px;max-width:620px;margin:0 auto 42px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 26px;box-shadow:0 10px 30px rgba(33,23,18,.06)}
+.grev__summary .gicon{width:40px;height:40px}
+.grev__sumtxt{flex:1;text-align:left}
+.grev__rate{display:flex;align-items:center;gap:10px}
+.grev__rate b{font-size:2rem;line-height:1;color:var(--espresso)}
+.grev__sumtxt>span{display:block;margin-top:5px;font-size:.9rem;color:var(--muted)}
+.grev__stars{display:inline-flex;gap:2px}
+.grev__stars svg{width:18px;height:18px}
+.grev__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start}
+.grev__card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 8px 24px rgba(33,23,18,.05);display:flex;flex-direction:column;gap:14px}
+.grev__top{display:flex;align-items:center;gap:12px}
+.grev__ava{width:46px;height:46px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--soft)}
+.grev__who{flex:1;min-width:0}
+.grev__who b{display:block;font-size:.98rem;color:var(--espresso);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grev__who span{font-size:.82rem;color:var(--muted)}
+.grev__card .grev__stars svg{width:16px;height:16px}
+.grev__card blockquote{margin:0;font-size:.95rem;line-height:1.65;color:var(--text)}
+.grev__foot{text-align:center;margin-top:34px}
+.grev__foot a{font-weight:700;color:var(--terra)}
+.grev__foot a:hover{color:var(--terra-600)}
+@media(max-width:900px){.grev__grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.grev__grid{grid-template-columns:1fr}.grev__summary{flex-direction:column;text-align:center}.grev__sumtxt{text-align:center}.grev__rate{justify-content:center}.grev{padding:60px 0}}
+
+/* ===== Pop-up de orçamento (modal do wizard) ===== */
+.emodal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.emodal.open{display:flex}
+.emodal__overlay{position:absolute;inset:0;background:rgba(20,14,10,.62);backdrop-filter:blur(3px)}
+.emodal__box{position:relative;z-index:1;width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.42);animation:emodalIn .25s ease}
+@keyframes emodalIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
+.emodal__box .wizard{margin:0;border-radius:18px;box-shadow:none}
+.emodal__x{position:absolute;top:12px;right:14px;z-index:3;width:38px;height:38px;border:none;background:rgba(255,255,255,.9);border-radius:50%;font-size:24px;line-height:36px;text-align:center;color:var(--espresso);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.emodal__x:hover{background:#fff;transform:scale(1.05)}
+body.emodal-open{overflow:hidden}
+@media(max-width:600px){.emodal{padding:10px}.emodal__box{max-height:96vh}}
