@@ -599,3 +599,21 @@ h3{font-weight:700;text-transform:none;letter-spacing:0}
 .emodal__x:hover{background:#fff;transform:scale(1.05)}
 body.emodal-open{overflow:hidden}
 @media(max-width:600px){.emodal{padding:10px}.emodal__box{max-height:96vh}}
+/* Callback popup (phone CTAs) — reuses the wizard look, compact */
+.emodal__box--sm{max-width:420px}
+.cback{background:#fff;border-radius:18px;overflow:hidden}
+.cback__top{padding:22px 26px 18px;background:linear-gradient(92deg,#7c431d,#a05f2c 55%,#7e441c);color:#fff}
+.cback__top h3{font-family:var(--serif);color:#fff;font-size:1.25rem;margin-bottom:4px}
+.cback__top p{color:#fdeee3;font-size:.85rem;line-height:1.4}
+.cback__body{padding:22px 26px 26px}
+.cback__form>div{margin-bottom:14px}
+.cback__form label{display:block;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--espresso);margin-bottom:6px}
+.cback__form input{width:100%;box-sizing:border-box;max-width:100%;padding:12px 14px;border:1.5px solid #e3d6cc;border-radius:10px;font-size:.95rem;font-family:inherit}
+.cback__form input:focus{outline:none;border-color:var(--terra)}
+.cback__send{width:100%;margin-top:4px}
+.cback__call{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-weight:700;font-size:.9rem;color:var(--terra);text-decoration:none}
+.cback__call svg{width:17px;height:17px}
+.cback__call:hover{text-decoration:underline}
+.cback__done{display:none;text-align:center}
+.cback__done.show{display:block}
+.cback.sent .cback__form,.cback.sent .cback__call{display:none}

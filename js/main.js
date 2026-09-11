@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWoodShine();
   initWizard();
   initEstimateModal();
+  initCallbackModal();
   initTracking();
 });
 
@@ -72,10 +73,11 @@ function buildLeadPayload(data, extra) {
   return p;
 }
 function initTracking() {
-  // Click-to-call on every tel: link
-  document.querySelectorAll('a[href^="tel:"]').forEach(a => {
+  // call_click on tel: links is fired by initCallbackModal (which also opens the callback popup).
+  // Only the popup-internal direct-dial buttons remain real tel: calls; track those.
+  document.querySelectorAll('.cback a[href^="tel:"], .wdone a[href^="tel:"], .wcall[href^="tel:"]').forEach(a => {
     a.addEventListener('click', () => {
-      ga('call_click', { source: leadSource(), page_location: location.href });
+      ga('call_click', { source: leadSource(), page_location: location.href, direct_dial: true });
     });
   });
   // WhatsApp links (none today, but future-proof for wa.me / whatsapp links)
@@ -112,6 +114,59 @@ function initEstimateModal() {
   document.querySelectorAll('a.btn, a.svc__tag, a.mobar__est').forEach(a => {
     if (a.closest('.emodal') || a.closest('.wizard')) return; // nunca os botoes internos do form
     if (isCTA(a)) a.addEventListener('click', e => { e.preventDefault(); open(); });
+  });
+}
+
+// Callback popup on every phone CTA. Clicking a tel: link opens a short "call me back"
+// popup (name + phone) that posts a lead_type=call lead (tag "ligacao") to the CRM,
+// carrying the same page origin as the form. The popup keeps a direct-dial button so
+// mobile users who just want to call now still can. This is NOT the DNI call tracking.
+function initCallbackModal() {
+  const modal = document.getElementById('callbackModal');
+  if (!modal) return;
+  const box = modal.querySelector('.cback');
+  const form = modal.querySelector('.cback__form');
+  const doneEl = modal.querySelector('.cback__done');
+  const open = () => { modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('emodal-open'); };
+  const close = () => {
+    modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); document.body.classList.remove('emodal-open');
+    // reset for next open
+    if (box) box.classList.remove('sent');
+    if (doneEl) doneEl.classList.remove('show');
+    if (form) { const b = form.querySelector('.cback__send'); if (b) { b.textContent = 'Call me back'; b.disabled = false; } }
+  };
+  modal.querySelectorAll('[data-cbclose]').forEach(el => el.addEventListener('click', close));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+  // Intercept every tel: link, except the direct-dial buttons inside popups (let those dial).
+  document.querySelectorAll('a[href^="tel:"]').forEach(a => {
+    if (a.closest('.cback') || a.closest('.wizard') || a.closest('.wdone')) return; // popup internal dial stays a real call
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      ga('call_click', { source: leadSource(), page_location: location.href, cta_text: (a.textContent || '').trim().slice(0, 60) });
+      open();
+    });
+  });
+
+  if (!form) return;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const hp = form.querySelector('input[name="company"]');
+    if (hp && hp.value) { return; } // honeypot
+    const btn = form.querySelector('.cback__send');
+    if (btn) { btn.textContent = 'Sending…'; btn.disabled = true; }
+    const fd = new FormData(form);
+    const data = { name: fd.get('name') || '', phone: fd.get('phone') || '', company: fd.get('company') || '' };
+    ga('form_submit', { source: leadSource(), form: 'callback', lead_type: 'call', converted: true, page_location: location.href });
+    const finish = () => { if (box) box.classList.add('sent'); if (doneEl) doneEl.classList.add('show'); };
+    getRecaptcha('callback').then((token) => {
+      const payload = buildLeadPayload(data, { recaptchaToken: token, form: 'callback', lead_type: 'call' });
+      // mark this as a phone-callback lead for the CRM
+      payload.lead_type = 'call';
+      payload.tags = (payload.tags || []).slice();
+      if (payload.tags.indexOf('ligacao') === -1) payload.tags.unshift('ligacao');
+      return postLead(payload);
+    }).then(() => { setTimeout(finish, 250); }).catch(() => { setTimeout(finish, 250); });
   });
 }
 
