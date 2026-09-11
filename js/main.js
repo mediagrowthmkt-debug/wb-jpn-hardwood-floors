@@ -7,7 +7,40 @@ document.addEventListener('DOMContentLoaded', () => {
   initWoodShine();
   initWizard();
   initEstimateModal();
+  initTracking();
 });
+
+// ---- GA4 conversion tracking ----
+// Fires call_click, cta_click, form_submit and whatsapp_click into GA4 (G-S9YPZKLR5M).
+// form_submit is the key conversion event. Lead "source" is website vs blog based on the URL.
+function ga(name, params) {
+  try { if (typeof gtag === 'function') gtag('event', name, params || {}); } catch (e) {}
+}
+function leadSource() {
+  return /\/blog\//.test(location.pathname) ? 'blog' : 'website';
+}
+function initTracking() {
+  // Click-to-call on every tel: link
+  document.querySelectorAll('a[href^="tel:"]').forEach(a => {
+    a.addEventListener('click', () => {
+      ga('call_click', { source: leadSource(), page_location: location.href });
+    });
+  });
+  // WhatsApp links (none today, but future-proof for wa.me / whatsapp links)
+  document.querySelectorAll('a[href*="wa.me"], a[href*="whatsapp"]').forEach(a => {
+    a.addEventListener('click', () => {
+      ga('whatsapp_click', { source: leadSource(), page_location: location.href });
+    });
+  });
+  // Primary CTA buttons (Free Estimate / Request / Get a Quote)
+  document.querySelectorAll('a.btn, a.svc__tag, a.mobar__est').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (href.indexOf('tel:') === 0 || href.indexOf('mailto:') === 0) return;
+    a.addEventListener('click', () => {
+      ga('cta_click', { source: leadSource(), cta_text: (a.textContent || '').trim().slice(0, 60), page_location: location.href });
+    });
+  });
+}
 
 function initEstimateModal() {
   const modal = document.getElementById('estimateModal');
@@ -69,7 +102,9 @@ function initWizard() {
       e.preventDefault();
       const btn = form.querySelector('.wsend');
       if (btn) { btn.textContent = 'Sending…'; btn.disabled = true; }
-      // GHL / backend integration point: POST { ...data, name, email, phone, city } here.
+      // Conversion event (key conversion). source = website | blog.
+      ga('form_submit', { source: leadSource(), form: 'estimate_wizard', service: data.service || '', converted: true, page_location: location.href });
+      // GHL / backend integration point: POST { ...data, name, email, phone, city, source } here.
       setTimeout(() => {
         steps.forEach(s => s.classList.remove('active'));
         if (nav) nav.style.display = 'none';
@@ -153,6 +188,8 @@ function initForm() {
     const orig = btn.textContent;
     btn.textContent = 'Sending…';
     btn.disabled = true;
+    // Conversion event (key conversion). source = website | blog.
+    ga('form_submit', { source: leadSource(), form: 'estimate_form', converted: true, page_location: location.href });
     // GHL / backend integration point: POST form data to the endpoint here.
     setTimeout(() => {
       form.querySelectorAll('input,select,textarea').forEach(f => f.value = '');
