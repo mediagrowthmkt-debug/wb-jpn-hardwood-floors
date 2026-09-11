@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavbar();
   initMobileMenu();
   initScrollReveal();
-  initForm();
   initSmoothClose();
   initWoodShine();
   initWizard();
@@ -12,12 +11,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ---- GA4 conversion tracking ----
 // Fires call_click, cta_click, form_submit and whatsapp_click into GA4 (G-S9YPZKLR5M).
-// form_submit is the key conversion event. Lead "source" is website vs blog based on the URL.
+// form_submit is the key conversion event. Lead "source" is set per page via window.MG_LEAD.
 function ga(name, params) {
   try { if (typeof gtag === 'function') gtag('event', name, params || {}); } catch (e) {}
 }
+// Per-page lead config injected by the build (source/service/city/endpoint). Falls back to website.
+function mgLead() {
+  return (typeof window !== 'undefined' && window.MG_LEAD) ? window.MG_LEAD : {};
+}
 function leadSource() {
-  return /\/blog\//.test(location.pathname) ? 'blog' : 'website';
+  var s = mgLead().source;
+  if (s) return s;
+  return /\/blog\//.test(location.pathname) ? 'blog/artigo' : 'website';
+}
+// Gets a reCAPTCHA v3 token if configured; resolves to '' when not set (endpoint fallback handles it).
+function getRecaptcha(action) {
+  var key = mgLead().recaptchaKey;
+  return new Promise(function (resolve) {
+    if (!key || typeof grecaptcha === 'undefined') { resolve(''); return; }
+    try {
+      grecaptcha.ready(function () {
+        grecaptcha.execute(key, { action: action || 'lead' }).then(resolve, function () { resolve(''); });
+      });
+    } catch (e) { resolve(''); }
+  });
+}
+// POSTs the lead to the CRM endpoint (n8n -> GHL). No endpoint yet = no-op (returns resolved promise),
+// so the visitor still sees the thank-you screen and GA4 still records the conversion.
+function postLead(payload) {
+  var cfg = mgLead();
+  if (!cfg.endpoint) return Promise.resolve({ ok: false, skipped: true });
+  return fetch(cfg.endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(function (r) { return { ok: r.ok, skipped: false }; })
+    .catch(function () { return { ok: false, skipped: false }; });
+}
+// Builds the full lead payload for the CRM (contact + note + opportunity fields).
+function buildLeadPayload(data, extra) {
+  var cfg = mgLead();
+  var p = {
+    name: (data.name || '').trim(),
+    email: (data.email || '').trim(),
+    phone: (data.phone || '').trim(),
+    city: (data.city || '').trim(),
+    service: data.service || '',        // service the visitor chose in step 1
+    property: data.property || '',
+    timeline: data.timeline || '',
+    // page classification for the CRM (granular origin)
+    source: cfg.source || leadSource(),
+    tags: (cfg.tags && cfg.tags.length) ? cfg.tags.slice() : [cfg.source || leadSource()],
+    page_service: cfg.service || '',    // service of the SEO page they landed on
+    page_city: cfg.city || '',          // city of the SEO page
+    page_url: location.href,
+    page_title: document.title,
+    company: (data.company || '')       // honeypot: must stay empty
+  };
+  if (extra) for (var k in extra) p[k] = extra[k];
+  return p;
 }
 function initTracking() {
   // Click-to-call on every tel: link
@@ -100,16 +152,32 @@ function initWizard() {
     if (back) back.addEventListener('click', () => { if (cur > 0) show(cur - 1); });
     form.addEventListener('submit', (e) => {
       e.preventDefault();
+      // Honeypot: a filled "company" field means a bot -> silently drop.
+      const hp = form.querySelector('input[name="company"]');
+      if (hp && hp.value) { return; }
       const btn = form.querySelector('.wsend');
       if (btn) { btn.textContent = 'Sending…'; btn.disabled = true; }
-      // Conversion event (key conversion). source = website | blog.
+      // pull the contact fields the visitor typed in step 4
+      const fd = new FormData(form);
+      data.name = fd.get('name') || '';
+      data.email = fd.get('email') || '';
+      data.phone = fd.get('phone') || '';
+      data.city = fd.get('city') || data.city || '';
+      data.company = fd.get('company') || '';
+      // Conversion event (key conversion). Fires regardless of endpoint availability.
       ga('form_submit', { source: leadSource(), form: 'estimate_wizard', service: data.service || '', converted: true, page_location: location.href });
-      // GHL / backend integration point: POST { ...data, name, email, phone, city, source } here.
-      setTimeout(() => {
+      const finish = () => {
         steps.forEach(s => s.classList.remove('active'));
         if (nav) nav.style.display = 'none';
         if (done) done.classList.add('show');
-      }, 650);
+      };
+      // reCAPTCHA -> build payload -> POST to CRM endpoint (n8n -> GHL). Always show thank-you.
+      getRecaptcha('estimate_wizard').then((token) => {
+        const payload = buildLeadPayload(data, { recaptchaToken: token, form: 'estimate_wizard' });
+        return postLead(payload);
+      }).then(() => {
+        setTimeout(finish, 250);
+      }).catch(() => { setTimeout(finish, 250); });
     });
     show(0);
   });
@@ -178,25 +246,3 @@ function initScrollReveal() {
   els.forEach(el => io.observe(el));
 }
 
-function initForm() {
-  const form = document.getElementById('estimateForm');
-  if (!form) return;
-  const ok = document.getElementById('formOk');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const btn = form.querySelector('button[type="submit"]');
-    const orig = btn.textContent;
-    btn.textContent = 'Sending…';
-    btn.disabled = true;
-    // Conversion event (key conversion). source = website | blog.
-    ga('form_submit', { source: leadSource(), form: 'estimate_form', converted: true, page_location: location.href });
-    // GHL / backend integration point: POST form data to the endpoint here.
-    setTimeout(() => {
-      form.querySelectorAll('input,select,textarea').forEach(f => f.value = '');
-      ok.style.display = 'block';
-      btn.textContent = orig;
-      btn.disabled = false;
-      setTimeout(() => { ok.style.display = 'none'; }, 6000);
-    }, 700);
-  });
-}
