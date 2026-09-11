@@ -610,7 +610,10 @@ body.emodal-open{overflow:hidden}
 .cback__form label{display:block;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--espresso);margin-bottom:6px}
 .cback__form input{width:100%;box-sizing:border-box;max-width:100%;padding:12px 14px;border:1.5px solid #e3d6cc;border-radius:10px;font-size:.95rem;font-family:inherit}
 .cback__form input:focus{outline:none;border-color:var(--terra)}
-.cback__send{width:100%;margin-top:4px}
+.cback__send{width:100%;margin-top:4px;display:inline-flex;align-items:center;justify-content:center;gap:9px}
+.cback__send svg{width:18px;height:18px;flex:0 0 auto}
+.cback__done .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px}
+.cback__done .btn svg{width:18px;height:18px;flex:0 0 auto}
 .cback__call{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-weight:700;font-size:.9rem;color:var(--terra);text-decoration:none}
 .cback__call svg{width:17px;height:17px}
 .cback__call:hover{text-decoration:underline}

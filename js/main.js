@@ -117,23 +117,25 @@ function initEstimateModal() {
   });
 }
 
-// Callback popup on every phone CTA. Clicking a tel: link opens a short "call me back"
-// popup (name + phone) that posts a lead_type=call lead (tag "ligacao") to the CRM,
-// carrying the same page origin as the form. The popup keeps a direct-dial button so
-// mobile users who just want to call now still can. This is NOT the DNI call tracking.
+// Callback popup on every phone CTA. Clicking a tel: link opens a minimal popup asking
+// ONLY the phone number. On submit it captures the number to the CRM (lead_type=call,
+// tag "ligacao" + page origin) as a best-effort POST, then IMMEDIATELY dials the real
+// number (tel:) so the call connects. The POST is fired before the dial; we don't block
+// the call on it. This is NOT the DNI call tracking (that logs the real call via a DID).
 function initCallbackModal() {
   const modal = document.getElementById('callbackModal');
   if (!modal) return;
   const box = modal.querySelector('.cback');
   const form = modal.querySelector('.cback__form');
   const doneEl = modal.querySelector('.cback__done');
+  const callHref = 'tel:+19787548751'; // NAP-safe real number the submit dials
   const open = () => { modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('emodal-open'); };
+  const resetBtn = () => { const b = form && form.querySelector('.cback__send'); if (b) { b.disabled = false; } };
   const close = () => {
     modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); document.body.classList.remove('emodal-open');
-    // reset for next open
     if (box) box.classList.remove('sent');
     if (doneEl) doneEl.classList.remove('show');
-    if (form) { const b = form.querySelector('.cback__send'); if (b) { b.textContent = 'Call me back'; b.disabled = false; } }
+    resetBtn();
   };
   modal.querySelectorAll('[data-cbclose]').forEach(el => el.addEventListener('click', close));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
@@ -152,21 +154,27 @@ function initCallbackModal() {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const hp = form.querySelector('input[name="company"]');
-    if (hp && hp.value) { return; } // honeypot
+    if (hp && hp.value) { return; } // honeypot -> silently drop
     const btn = form.querySelector('.cback__send');
-    if (btn) { btn.textContent = 'Sending…'; btn.disabled = true; }
+    if (btn) { btn.disabled = true; }
     const fd = new FormData(form);
-    const data = { name: fd.get('name') || '', phone: fd.get('phone') || '', company: fd.get('company') || '' };
+    const phone = (fd.get('phone') || '').toString().trim();
+    // Phone-only capture: no name field, so label the CRM contact by the number.
+    const data = { name: 'Phone lead ' + phone, phone: phone, company: fd.get('company') || '' };
     ga('form_submit', { source: leadSource(), form: 'callback', lead_type: 'call', converted: true, page_location: location.href });
-    const finish = () => { if (box) box.classList.add('sent'); if (doneEl) doneEl.classList.add('show'); };
-    getRecaptcha('callback').then((token) => {
-      const payload = buildLeadPayload(data, { recaptchaToken: token, form: 'callback', lead_type: 'call' });
-      // mark this as a phone-callback lead for the CRM
-      payload.lead_type = 'call';
-      payload.tags = (payload.tags || []).slice();
-      if (payload.tags.indexOf('ligacao') === -1) payload.tags.unshift('ligacao');
-      return postLead(payload);
-    }).then(() => { setTimeout(finish, 250); }).catch(() => { setTimeout(finish, 250); });
+    ga('call_click', { source: leadSource(), form: 'callback', page_location: location.href });
+
+    // Capture the number to the CRM FIRST (best-effort, fire-and-forget), then dial.
+    const payload = buildLeadPayload(data, { form: 'callback', lead_type: 'call' });
+    payload.lead_type = 'call';
+    payload.tags = (payload.tags || []).slice();
+    if (payload.tags.indexOf('ligacao') === -1) payload.tags.unshift('ligacao');
+    try { postLead(payload); } catch (err) {} // do NOT await — never block the call
+
+    // Show the "connecting" state and dial the real number right away.
+    if (box) box.classList.add('sent');
+    if (doneEl) doneEl.classList.add('show');
+    setTimeout(() => { try { window.location.href = callHref; } catch (err) {} resetBtn(); }, 150);
   });
 }
 
