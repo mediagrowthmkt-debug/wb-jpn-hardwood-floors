@@ -1,0 +1,115 @@
+{
+ "images/hero/hero-main.webp": {
+  "w": 1200,
+  "h": 1600,
+  "m": "images/hero/hero-main-m.webp",
+  "mw": 800,
+  "mh": 1067
+ },
+ "images/svc/svc-engineered.webp": {
+  "w": 781,
+  "h": 1400,
+  "m": "images/svc/svc-engineered-m.webp",
+  "mw": 740,
+  "mh": 1327
+ },
+ "images/svc/svc-herringbone.webp": {
+  "w": 1400,
+  "h": 781,
+  "m": "images/svc/svc-herringbone-m.webp",
+  "mw": 1000,
+  "mh": 558
+ },
+ "images/svc/svc-installation.webp": {
+  "w": 1045,
+  "h": 1400,
+  "m": "images/svc/svc-installation-m.webp",
+  "mw": 800,
+  "mh": 1072
+ },
+ "images/svc/svc-refinishing.webp": {
+  "w": 781,
+  "h": 1400,
+  "m": "images/svc/svc-refinishing-m.webp",
+  "mw": 740,
+  "mh": 1327
+ },
+ "images/svc/svc-removal.webp": {
+  "w": 1050,
+  "h": 1400,
+  "m": "images/svc/svc-removal-m.webp",
+  "mw": 800,
+  "mh": 1067
+ },
+ "images/svc/svc-repair.webp": {
+  "w": 788,
+  "h": 1400,
+  "m": "images/svc/svc-repair-m.webp",
+  "mw": 740,
+  "mh": 1315
+ },
+ "images/svc/svc-sanding.webp": {
+  "w": 1400,
+  "h": 1045,
+  "m": "images/svc/svc-sanding-m.webp",
+  "mw": 1000,
+  "mh": 746
+ },
+ "images/svc/svc-stairs.webp": {
+  "w": 1045,
+  "h": 1400,
+  "m": "images/svc/svc-stairs-m.webp",
+  "mw": 800,
+  "mh": 1072
+ },
+ "images/svc/svc-subfloor.webp": {
+  "w": 760,
+  "h": 1351
+ },
+ "images/svc/svc-vinyl.webp": {
+  "w": 1045,
+  "h": 1400,
+  "m": "images/svc/svc-vinyl-m.webp",
+  "mw": 800,
+  "mh": 1072
+ },
+ "images/work/work-01.webp": {
+  "w": 900,
+  "h": 1600,
+  "m": "images/work/work-01-m.webp",
+  "mw": 800,
+  "mh": 1422
+ },
+ "images/work/work-02.webp": {
+  "w": 1085,
+  "h": 1400,
+  "m": "images/work/work-02-m.webp",
+  "mw": 800,
+  "mh": 1032
+ },
+ "images/work/work-04.webp": {
+  "w": 576,
+  "h": 1024
+ },
+ "images/work/work-07.webp": {
+  "w": 900,
+  "h": 1600,
+  "m": "images/work/work-07-m.webp",
+  "mw": 800,
+  "mh": 1422
+ },
+ "images/work/work-08.webp": {
+  "w": 1000,
+  "h": 1333,
+  "m": "images/work/work-08-m.webp",
+  "mw": 800,
+  "mh": 1066
+ },
+ "images/work/work-09.webp": {
+  "w": 781,
+  "h": 1400,
+  "m": "images/work/work-09-m.webp",
+  "mw": 740,
+  "mh": 1327
+ }
+}
