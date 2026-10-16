@@ -621,3 +621,51 @@ body.emodal-open{overflow:hidden}
 .cback__done{display:none;text-align:center}
 .cback__done.show{display:block}
 .cback.sent .cback__form,.cback.sent .cback__call{display:none}
+/* Kevin 15-10-26: sem rolagem lateral no celular + sticky da sidebar volta a funcionar */
+body{overflow-x:clip}
+.contact__wrap>*,.cinfo>div{min-width:0}
+.cinfo b,.cinfo span{overflow-wrap:anywhere}
+/* Paginas de cidade: titulos sem quebra forcada, blocos visuais, tabela na marca, hero nitido */
+.layout--city .prose{max-width:none}
+.layout--city .prose h2{text-wrap:pretty;max-width:none}
+.layout--city .pblock{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 30px 12px;margin:0 0 22px}
+.layout--city .pblock:nth-of-type(even){background:var(--bg-light)}
+.layout--city .pblock>h2{margin:0 0 14px;font-size:clamp(1.35rem,2.2vw,1.75rem)}
+.layout--city .pcta{display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--espresso);color:#fff;border-radius:16px;padding:24px 28px;margin:0 0 22px}
+.layout--city .pcta b{display:block;font-size:1.08rem;margin-bottom:4px}
+.layout--city .pcta span{color:#d6c9bd;font-size:.92rem}
+.layout--city .pcta__btns{display:flex;gap:10px;flex-wrap:wrap}
+.layout--city .pcta__btns .btn svg{width:18px;height:18px;flex:0 0 18px}
+.layout--city .pphoto{margin:0 0 22px}
+.layout--city .pphoto img{width:100%;height:340px;object-fit:cover;border-radius:16px;margin:0}
+.layout--city .table-scroll{overflow-x:auto;margin:6px 0 14px;border-radius:12px;border:1px solid var(--line)}
+.layout--city table{width:100%;border-collapse:collapse;font-size:.95rem;background:#fff}
+.layout--city thead th{background:var(--espresso);color:#fff;text-align:left;padding:13px 16px;font-weight:700}
+.layout--city tbody td{padding:12px 16px;border-top:1px solid var(--line);color:#3f362e}
+.layout--city tbody tr:nth-child(even) td{background:var(--bg-light)}
+.layout--city tbody td:last-child{font-weight:700;color:var(--terra);white-space:nowrap}
+.layout--city ul.cities{display:flex;flex-wrap:wrap;gap:10px}
+.layout--city ul.cities li{padding:9px 14px}
+.layout--city ul.cities li::before,.layout--city ul.cities li::after{display:none}
+.subhero--city .subhero__bg{opacity:.62}
+.subhero--city .subhero__bg::after{background:linear-gradient(110deg,rgba(20,13,8,.9) 0%,rgba(20,13,8,.55) 55%,rgba(20,13,8,.25) 100%)}
+@media(max-width:768px){.layout--city .pblock{padding:22px 18px 8px}.layout--city .pphoto img{height:220px}.layout--city .pcta{padding:20px}.layout--city .pcta__btns,.layout--city .pcta__btns .btn{width:100%;justify-content:center}}
+.layout>*{min-width:0}
+@media(max-width:768px){.layout--city tbody td:last-child{white-space:normal}}
+.layout--city .prose h2{font-family:var(--serif);text-transform:none;letter-spacing:-.01em;font-weight:700;line-height:1.2}
+/* Kevin 15-10-26: formulario/contato sem estouro no celular (360-414px) */
+.wopt{min-width:0}
+@media(max-width:600px){
+  .wizard__top{padding:20px 20px 18px}
+  .wizard__body{padding:22px 16px 24px}
+  .wopts{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .wopt{padding:12px 10px;gap:8px;font-size:.86rem;line-height:1.25;overflow-wrap:break-word}
+  .wopt svg{width:18px;height:18px}
+  .wfields .row2{grid-template-columns:1fr}
+  .wnav{flex-wrap:wrap;gap:10px}
+  .cinfo b{font-size:clamp(.78rem,3.7vw,.98rem);overflow-wrap:normal;word-break:normal}
+}
+.grev__grid>*{min-width:0}
+.grev__card{overflow-wrap:break-word}
+@media(max-width:420px){.grev__summary{flex-wrap:wrap;padding:16px 18px;gap:12px}}
+.emodal__box .wizard__top{padding-right:62px}
