@@ -497,6 +497,9 @@ p{font-size:clamp(.98rem,1.4vw,1.08rem)}
 .wsummary{background:var(--bg-light);border:1px dashed var(--line);border-radius:10px;padding:12px 15px;font-size:.85rem;color:var(--muted);margin-bottom:16px}
 .wsummary b{color:var(--espresso)}
 .wsend{width:100%;justify-content:center;margin-top:4px}
+.grecaptcha-badge{visibility:hidden}
+.wrc{margin:10px 0 0;font-size:11px;line-height:1.4;color:var(--muted);text-align:center}
+.wrc a{color:inherit;text-decoration:underline}
 .wnav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
 .wback{background:none;border:0;color:var(--muted);font-weight:700;cursor:pointer;font-family:var(--font);font-size:.9rem;display:none;align-items:center;gap:6px}
 .wback.show{display:inline-flex}

@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initEstimateModal();
   initCallbackModal();
   initTracking();
+  setTimeout(flushLeadQueue, 1500);
 });
 
 // ---- GA4 conversion tracking ----
@@ -39,15 +40,69 @@ function getRecaptcha(action) {
 }
 // POSTs the lead to the CRM endpoint (n8n -> GHL). No endpoint yet = no-op (returns resolved promise),
 // so the visitor still sees the thank-you screen and GA4 still records the conversion.
+// Safety net (16-11-26, n8n outage): the lead is kept in localStorage until one path confirms it.
+// 1) n8n with an 8 s timeout -> 2) backup endpoint (Hostinger, independent server) -> 3) stays queued and
+// is re-sent on the next page the visitor opens. The visitor always sees the thank-you screen.
+var LEAD_QUEUE_KEY = 'mg_lead_pending';
+function leadQueue() { try { return JSON.parse(localStorage.getItem(LEAD_QUEUE_KEY) || '[]'); } catch (e) { return []; } }
+function saveLeadQueue(q) { try { localStorage.setItem(LEAD_QUEUE_KEY, JSON.stringify(q.slice(-10))); } catch (e) {} }
+function queueLead(p) { var q = leadQueue().filter(function (x) { return x.lead_id !== p.lead_id; }); q.push(p); saveLeadQueue(q); }
+function unqueueLead(id) { saveLeadQueue(leadQueue().filter(function (x) { return x.lead_id !== id; })); }
+function postJSON(url, payload, ms) {
+  var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, ms || 8000) : null;
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    keepalive: true,
+    signal: ctrl ? ctrl.signal : undefined
+  }).then(function (r) { if (timer) clearTimeout(timer); return r.ok; })
+    .catch(function () { if (timer) clearTimeout(timer); return false; });
+}
+function postBackup(payload) {
+  var cfg = mgLead();
+  if (!cfg.backup) return Promise.resolve(false);
+  var p = {}; for (var k in payload) p[k] = payload[k];
+  p.via = 'reserva';
+  return postJSON(cfg.backup, p, 8000).then(function (ok) { if (ok) unqueueLead(payload.lead_id); return ok; });
+}
+// Resolves after the n8n attempt (max 8 s). If n8n fails, the backup runs in the background (keepalive).
 function postLead(payload) {
   var cfg = mgLead();
   if (!cfg.endpoint) return Promise.resolve({ ok: false, skipped: true });
-  return fetch(cfg.endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  }).then(function (r) { return { ok: r.ok, skipped: false }; })
-    .catch(function () { return { ok: false, skipped: false }; });
+  var bot = !!(payload.company);
+  if (!bot) queueLead(payload);
+  return postJSON(cfg.endpoint, payload, 8000).then(function (ok) {
+    if (ok) { unqueueLead(payload.lead_id); return { ok: true, skipped: false }; }
+    if (!bot) postBackup(payload);
+    return { ok: false, skipped: false };
+  });
+}
+// Re-sends leads that no path confirmed (visitor closed the tab, both servers down, offline).
+function flushLeadQueue() {
+  // Wakes the backup server so leads it stored while n8n was down get re-sent (it throttles to 1x / 5 min).
+  try {
+    var cfg = mgLead();
+    if (cfg.backup && !sessionStorage.getItem('mg_bk_ping')) {
+      sessionStorage.setItem('mg_bk_ping', '1');
+      fetch(cfg.backup + '?action=ping', { method: 'GET', mode: 'cors', keepalive: true }).catch(function () {});
+    }
+  } catch (e) {}
+  var q = leadQueue();
+  if (!q.length) return;
+  q.forEach(function (p) {
+    if (Date.now() - (p.created_at || 0) > 14 * 86400000) { unqueueLead(p.lead_id); return; }
+    p.retry = (p.retry || 0) + 1;
+    getRecaptcha('retry').then(function (t) { // fresh token: the original one expires in 2 min
+      if (t) p.recaptchaToken = t;
+      postJSON(mgLead().endpoint, p, 8000).then(function (ok) { if (ok) unqueueLead(p.lead_id); else postBackup(p); });
+    });
+  });
+}
+function newLeadId() {
+  try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+  return 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
 }
 // Builds the full lead payload for the CRM (contact + note + opportunity fields).
 function buildLeadPayload(data, extra) {
@@ -67,7 +122,10 @@ function buildLeadPayload(data, extra) {
     page_city: cfg.city || '',          // city of the SEO page
     page_url: location.href,
     page_title: document.title,
-    company: (data.company || '')       // honeypot: must stay empty
+    company: (data.company || ''),      // honeypot: must stay empty
+    lead_id: newLeadId(),               // same id on n8n and backup -> no duplicate in the CRM
+    elapsed_ms: (data.t0 ? Date.now() - data.t0 : ''), // time since the form opened (bots < 3 s)
+    created_at: Date.now()
   };
   if (extra) for (var k in extra) p[k] = extra[k];
   return p;
@@ -99,7 +157,7 @@ function initTracking() {
 function initEstimateModal() {
   const modal = document.getElementById('estimateModal');
   if (!modal) return;
-  const open = () => { modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('emodal-open'); };
+  const open = () => { modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('emodal-open'); modal.querySelectorAll('.wizard').forEach(w => w.dispatchEvent(new Event('mg-open'))); };
   const close = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); document.body.classList.remove('emodal-open'); };
   modal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', close));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
@@ -129,7 +187,8 @@ function initCallbackModal() {
   const form = modal.querySelector('.cback__form');
   const doneEl = modal.querySelector('.cback__done');
   const callHref = 'tel:+19787548751'; // NAP-safe real number the submit dials
-  const open = () => { modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('emodal-open'); };
+  let shownAt = Date.now();
+  const open = () => { shownAt = Date.now(); modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('emodal-open'); };
   const resetBtn = () => { const b = form && form.querySelector('.cback__send'); if (b) { b.disabled = false; } };
   const close = () => {
     modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); document.body.classList.remove('emodal-open');
@@ -153,14 +212,13 @@ function initCallbackModal() {
   if (!form) return;
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const hp = form.querySelector('input[name="company"]');
-    if (hp && hp.value) { return; } // honeypot -> silently drop
+    // Honeypot filled = bot: still posted so n8n logs and discards it (never reaches the CRM).
     const btn = form.querySelector('.cback__send');
     if (btn) { btn.disabled = true; }
     const fd = new FormData(form);
     const phone = (fd.get('phone') || '').toString().trim();
     // Phone-only capture: no name field, so label the CRM contact by the number.
-    const data = { name: 'Phone lead ' + phone, phone: phone, company: fd.get('company') || '' };
+    const data = { name: 'Phone lead ' + phone, phone: phone, company: fd.get('company') || '', t0: shownAt };
     ga('form_submit', { source: leadSource(), form: 'callback', lead_type: 'call', converted: true, page_location: location.href });
     ga('call_click', { source: leadSource(), form: 'callback', page_location: location.href });
 
@@ -169,7 +227,8 @@ function initCallbackModal() {
     payload.lead_type = 'call';
     payload.tags = (payload.tags || []).slice();
     if (payload.tags.indexOf('ligacao') === -1) payload.tags.unshift('ligacao');
-    try { postLead(payload); } catch (err) {} // do NOT await — never block the call
+    if (!payload.company) queueLead(payload); // kept until sent, even if the dial leaves the page
+    try { getRecaptcha('callback').then(t => { payload.recaptchaToken = t; postLead(payload); }); } catch (err) {} // do NOT await — never block the call
 
     // Show the "connecting" state and dial the real number right away.
     if (box) box.classList.add('sent');
@@ -188,7 +247,8 @@ function initWizard() {
     const nav = wz.querySelector('.wnav');
     const form = wz.querySelector('form');
     if (!steps.length || !form) return;
-    const data = {};
+    const data = { t0: Date.now() };
+    wz.addEventListener('mg-open', () => { data.t0 = Date.now(); });
     let cur = 0;
     const total = steps.length;
     function show(i) {
@@ -215,9 +275,7 @@ function initWizard() {
     if (back) back.addEventListener('click', () => { if (cur > 0) show(cur - 1); });
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      // Honeypot: a filled "company" field means a bot -> silently drop.
-      const hp = form.querySelector('input[name="company"]');
-      if (hp && hp.value) { return; }
+      // Honeypot: a filled "company" field means a bot. It is still posted so n8n logs and discards it.
       const btn = form.querySelector('.wsend');
       if (btn) { btn.textContent = 'Sending…'; btn.disabled = true; }
       // pull the contact fields the visitor typed in step 4
