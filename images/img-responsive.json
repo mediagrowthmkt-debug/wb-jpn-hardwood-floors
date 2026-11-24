@@ -1,0 +1,282 @@
+{
+ "images/svc/svc-engineered.webp": {
+  "w": 781,
+  "h": 1400,
+  "s": "images/svc/svc-engineered-s.webp",
+  "sw": 720,
+  "sh": 1291
+ },
+ "images/svc/svc-herringbone.webp": {
+  "w": 1400,
+  "h": 781,
+  "s": "images/svc/svc-herringbone-s.webp",
+  "sw": 720,
+  "sh": 402
+ },
+ "images/svc/svc-installation.webp": {
+  "w": 1045,
+  "h": 1400,
+  "s": "images/svc/svc-installation-s.webp",
+  "sw": 720,
+  "sh": 965
+ },
+ "images/svc/svc-refinishing.webp": {
+  "w": 781,
+  "h": 1400,
+  "s": "images/svc/svc-refinishing-s.webp",
+  "sw": 720,
+  "sh": 1291
+ },
+ "images/svc/svc-removal.webp": {
+  "w": 1050,
+  "h": 1400,
+  "s": "images/svc/svc-removal-s.webp",
+  "sw": 720,
+  "sh": 960
+ },
+ "images/svc/svc-repair.webp": {
+  "w": 788,
+  "h": 1400,
+  "s": "images/svc/svc-repair-s.webp",
+  "sw": 720,
+  "sh": 1279
+ },
+ "images/svc/svc-sanding.webp": {
+  "w": 1400,
+  "h": 1045,
+  "s": "images/svc/svc-sanding-s.webp",
+  "sw": 720,
+  "sh": 537
+ },
+ "images/svc/svc-stairs.webp": {
+  "w": 1045,
+  "h": 1400,
+  "s": "images/svc/svc-stairs-s.webp",
+  "sw": 720,
+  "sh": 965
+ },
+ "images/svc/svc-vinyl.webp": {
+  "w": 1045,
+  "h": 1400,
+  "s": "images/svc/svc-vinyl-s.webp",
+  "sw": 720,
+  "sh": 965
+ },
+ "images/work/ba1-after.webp": {
+  "w": 800,
+  "h": 1066,
+  "s": "images/work/ba1-after-s.webp",
+  "sw": 720,
+  "sh": 959
+ },
+ "images/work/ba1-before.webp": {
+  "w": 800,
+  "h": 1408,
+  "s": "images/work/ba1-before-s.webp",
+  "sw": 720,
+  "sh": 1267
+ },
+ "images/work/ba2-after.webp": {
+  "w": 800,
+  "h": 1422,
+  "s": "images/work/ba2-after-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/ba2-before.webp": {
+  "w": 800,
+  "h": 1422,
+  "s": "images/work/ba2-before-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/proj-attleboro-engineered-1.webp": {
+  "w": 1050,
+  "h": 1400,
+  "s": "images/work/proj-attleboro-engineered-1-s.webp",
+  "sw": 720,
+  "sh": 960
+ },
+ "images/work/proj-attleboro-engineered-kitchen.webp": {
+  "w": 1050,
+  "h": 1400,
+  "s": "images/work/proj-attleboro-engineered-kitchen-s.webp",
+  "sw": 720,
+  "sh": 960
+ },
+ "images/work/proj-attleboro-gluedown.webp": {
+  "w": 1050,
+  "h": 1400,
+  "s": "images/work/proj-attleboro-gluedown-s.webp",
+  "sw": 720,
+  "sh": 960
+ },
+ "images/work/proj-boston-herringbone-1.webp": {
+  "w": 1400,
+  "h": 788,
+  "s": "images/work/proj-boston-herringbone-1-s.webp",
+  "sw": 720,
+  "sh": 405
+ },
+ "images/work/proj-boston-herringbone-2.webp": {
+  "w": 1400,
+  "h": 788,
+  "s": "images/work/proj-boston-herringbone-2-s.webp",
+  "sw": 720,
+  "sh": 405
+ },
+ "images/work/proj-boston-herringbone-layout.webp": {
+  "w": 788,
+  "h": 1400,
+  "s": "images/work/proj-boston-herringbone-layout-s.webp",
+  "sw": 720,
+  "sh": 1279
+ },
+ "images/work/proj-boston-plank-1.webp": {
+  "w": 1050,
+  "h": 1400,
+  "s": "images/work/proj-boston-plank-1-s.webp",
+  "sw": 720,
+  "sh": 960
+ },
+ "images/work/proj-boston-plank-hall.webp": {
+  "w": 788,
+  "h": 1400,
+  "s": "images/work/proj-boston-plank-hall-s.webp",
+  "sw": 720,
+  "sh": 1279
+ },
+ "images/work/work-01.webp": {
+  "w": 900,
+  "h": 1600,
+  "s": "images/work/work-01-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/work-02.webp": {
+  "w": 1085,
+  "h": 1400,
+  "s": "images/work/work-02-s.webp",
+  "sw": 720,
+  "sh": 929
+ },
+ "images/work/work-03.webp": {
+  "w": 1000,
+  "h": 1777,
+  "s": "images/work/work-03-s.webp",
+  "sw": 720,
+  "sh": 1279
+ },
+ "images/work/work-05.webp": {
+  "w": 1000,
+  "h": 1333,
+  "s": "images/work/work-05-s.webp",
+  "sw": 720,
+  "sh": 960
+ },
+ "images/work/work-06.webp": {
+  "w": 900,
+  "h": 1600,
+  "s": "images/work/work-06-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/work-07.webp": {
+  "w": 900,
+  "h": 1600,
+  "s": "images/work/work-07-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/work-08.webp": {
+  "w": 1000,
+  "h": 1333,
+  "s": "images/work/work-08-s.webp",
+  "sw": 720,
+  "sh": 960
+ },
+ "images/work/work-09.webp": {
+  "w": 781,
+  "h": 1400,
+  "s": "images/work/work-09-s.webp",
+  "sw": 720,
+  "sh": 1291
+ },
+ "images/work/work-10.webp": {
+  "w": 900,
+  "h": 1600,
+  "s": "images/work/work-10-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/work-11.webp": {
+  "w": 900,
+  "h": 1600,
+  "s": "images/work/work-11-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/work-12.webp": {
+  "w": 900,
+  "h": 1600,
+  "s": "images/work/work-12-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/work-13.webp": {
+  "w": 900,
+  "h": 1600,
+  "s": "images/work/work-13-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/work-14.webp": {
+  "w": 900,
+  "h": 1600,
+  "s": "images/work/work-14-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/work-15.webp": {
+  "w": 900,
+  "h": 1600,
+  "s": "images/work/work-15-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/work-16.webp": {
+  "w": 1200,
+  "h": 1600,
+  "s": "images/work/work-16-s.webp",
+  "sw": 720,
+  "sh": 960
+ },
+ "images/work/work-17.webp": {
+  "w": 900,
+  "h": 1600,
+  "s": "images/work/work-17-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/work-18.webp": {
+  "w": 900,
+  "h": 1600,
+  "s": "images/work/work-18-s.webp",
+  "sw": 720,
+  "sh": 1280
+ },
+ "images/work/work-19.webp": {
+  "w": 1200,
+  "h": 1600,
+  "s": "images/work/work-19-s.webp",
+  "sw": 720,
+  "sh": 960
+ },
+ "images/work/work-20.webp": {
+  "w": 1200,
+  "h": 1600,
+  "s": "images/work/work-20-s.webp",
+  "sw": 720,
+  "sh": 960
+ }
+}

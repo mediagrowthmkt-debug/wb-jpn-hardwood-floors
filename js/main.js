@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initEstimateModal();
   initCallbackModal();
   initTracking();
+  initRecaptchaOnDemand();
   setTimeout(flushLeadQueue, 1500);
 });
 
@@ -26,16 +27,48 @@ function leadSource() {
   if (s) return s;
   return /\/blog\//.test(location.pathname) ? 'blog/artigo' : 'website';
 }
+// reCAPTCHA v3 is loaded on demand (Core Web Vitals, 18-11-26): only when the visitor touches a form or
+// opens a popup, or at submit time. Same site key, same token sent to n8n.
+var _rcLoading = null;
+function loadRecaptcha() {
+  var key = mgLead().recaptchaKey;
+  if (!key) return Promise.resolve(false);
+  if (typeof grecaptcha !== 'undefined' && grecaptcha.execute) return Promise.resolve(true);
+  if (_rcLoading) return _rcLoading;
+  _rcLoading = new Promise(function (resolve) {
+    var s = document.createElement('script');
+    s.src = 'https://www.google.com/recaptcha/api.js?render=' + encodeURIComponent(key);
+    s.async = true;
+    s.onload = function () { resolve(true); };
+    s.onerror = function () { _rcLoading = null; resolve(false); };
+    document.head.appendChild(s);
+  });
+  return _rcLoading;
+}
+// Loads on the visitor's FIRST interaction anywhere (scroll, tap, click, key), so reCAPTCHA still watches
+// almost the whole visit (good score) but stays out of the first paint. Pending lead queue = load now.
+function initRecaptchaOnDemand() {
+  var evs = ['pointerdown', 'touchstart', 'keydown', 'scroll', 'focusin'];
+  var warm = function () { evs.forEach(function (ev) { removeEventListener(ev, warm, true); }); loadRecaptcha(); };
+  evs.forEach(function (ev) { addEventListener(ev, warm, { passive: true, capture: true }); });
+}
 // Gets a reCAPTCHA v3 token if configured; resolves to '' when not set (endpoint fallback handles it).
+// Waits at most 8 s for the script, so a slow load never blocks the lead.
 function getRecaptcha(action) {
   var key = mgLead().recaptchaKey;
   return new Promise(function (resolve) {
-    if (!key || typeof grecaptcha === 'undefined') { resolve(''); return; }
-    try {
-      grecaptcha.ready(function () {
-        grecaptcha.execute(key, { action: action || 'lead' }).then(resolve, function () { resolve(''); });
-      });
-    } catch (e) { resolve(''); }
+    if (!key) { resolve(''); return; }
+    var done = false;
+    var fin = function (v) { if (!done) { done = true; resolve(v || ''); } };
+    setTimeout(function () { fin(''); }, 8000);
+    loadRecaptcha().then(function (ok) {
+      if (!ok || typeof grecaptcha === 'undefined') { fin(''); return; }
+      try {
+        grecaptcha.ready(function () {
+          grecaptcha.execute(key, { action: action || 'lead' }).then(fin, function () { fin(''); });
+        });
+      } catch (e) { fin(''); }
+    });
   });
 }
 // POSTs the lead to the CRM endpoint (n8n -> GHL). No endpoint yet = no-op (returns resolved promise),

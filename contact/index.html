@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<!-- Google tag (gtag.js): carregado depois do load (page_view fica na fila do dataLayer) -->
+<!-- Google tag (gtag.js): carrega na 1a interacao ou 3,5 s apos o load (page_view fica na fila do dataLayer) -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-S9YPZKLR5M');
-  window.addEventListener('load', function(){var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-S9YPZKLR5M';document.head.appendChild(s);});
+  (function(){var d=0;function L(){if(d)return;d=1;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-S9YPZKLR5M';document.head.appendChild(s);}
+  ['pointerdown','keydown','touchstart','scroll'].forEach(function(e){addEventListener(e,L,{once:true,passive:true});});
+  addEventListener('load',function(){setTimeout(L,3500);});})();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preload" as="image" href="../images/hero/hero-main.webp" imagesrcset="../images/hero/hero-main-m.webp 800w, ../images/hero/hero-main.webp 1200w" imagesizes="100vw" fetchpriority="high">
@@ -207,6 +209,6 @@
   </div>
 </div>
 <script>window.MG_LEAD={"endpoint": "https://mediagrowth-n8n.63kuy3.easypanel.host/webhook/jpn-site-lead", "backup": "https://mediagrowth.com.br/jpn-lead-reserva/api.php", "source": "website", "service": "", "city": "", "tags": [], "recaptchaKey": "6LfV5SMuAAAAACTiCQRgLYEbphKvT-pG3PUXIDgo"};</script>
-<script src="https://www.google.com/recaptcha/api.js?render=6LfV5SMuAAAAACTiCQRgLYEbphKvT-pG3PUXIDgo"></script>
-<script src="../js/main.js"></script>
+
+<script src="../js/main.js?v=2a264e0a"></script>
 </body></html>
