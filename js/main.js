@@ -256,12 +256,19 @@ function initCallbackModal() {
     ga('call_click', { source: leadSource(), form: 'callback', page_location: location.href });
 
     // Capture the number to the CRM FIRST (best-effort, fire-and-forget), then dial.
-    const payload = buildLeadPayload(data, { form: 'callback', lead_type: 'call' });
-    payload.lead_type = 'call';
-    payload.tags = (payload.tags || []).slice();
-    if (payload.tags.indexOf('ligacao') === -1) payload.tags.unshift('ligacao');
-    if (!payload.company) queueLead(payload); // kept until sent, even if the dial leaves the page
-    try { getRecaptcha('callback').then(t => { payload.recaptchaToken = t; postLead(payload); }); } catch (err) {} // do NOT await — never block the call
+    // Phone is optional (A2P): with no number typed we just dial, nothing goes to the CRM.
+    const cbBox = form.querySelector('input[name="sms_consent_transactional"]');
+    const cbConsent = { form: 'callback', lead_type: 'call',
+      sms_consent_transactional: cbBox ? (cbBox.checked ? 'yes' : 'no') : 'not_offered', sms_consent_marketing: 'not_offered' };
+    if (cbBox && cbBox.checked) { cbConsent.sms_consent_at = new Date().toISOString(); cbConsent.sms_consent_text = cbBox.closest('label').textContent.trim(); }
+    if (phone) {
+      const payload = buildLeadPayload(data, cbConsent);
+      payload.lead_type = 'call';
+      payload.tags = (payload.tags || []).slice();
+      if (payload.tags.indexOf('ligacao') === -1) payload.tags.unshift('ligacao');
+      if (!payload.company) queueLead(payload); // kept until sent, even if the dial leaves the page
+      try { getRecaptcha('callback').then(t => { payload.recaptchaToken = t; postLead(payload); }); } catch (err) {} // do NOT await — never block the call
+    }
 
     // Show the "connecting" state and dial the real number right away.
     if (box) box.classList.add('sent');
@@ -318,6 +325,17 @@ function initWizard() {
       data.phone = fd.get('phone') || '';
       data.city = fd.get('city') || data.city || '';
       data.company = fd.get('company') || '';
+      // SMS consent (A2P 10DLC): only the home page inline form shows the boxes; elsewhere it is "not_offered".
+      const cTxn = form.querySelector('input[name="sms_consent_transactional"]');
+      const cMkt = form.querySelector('input[name="sms_consent_marketing"]');
+      const consent = {
+        sms_consent_transactional: cTxn ? (cTxn.checked ? 'yes' : 'no') : 'not_offered',
+        sms_consent_marketing: cMkt ? (cMkt.checked ? 'yes' : 'no') : 'not_offered'
+      };
+      if ((cTxn && cTxn.checked) || (cMkt && cMkt.checked)) {
+        consent.sms_consent_at = new Date().toISOString();
+        consent.sms_consent_text = [cTxn && cTxn.checked ? cTxn.closest('label').textContent.trim() : '', cMkt && cMkt.checked ? cMkt.closest('label').textContent.trim() : ''].filter(Boolean).join(' | ');
+      }
       // Conversion event (key conversion). Fires regardless of endpoint availability.
       ga('form_submit', { source: leadSource(), form: 'estimate_wizard', service: data.service || '', converted: true, page_location: location.href });
       const finish = () => {
@@ -327,7 +345,9 @@ function initWizard() {
       };
       // reCAPTCHA -> build payload -> POST to CRM endpoint (n8n -> GHL). Always show thank-you.
       getRecaptcha('estimate_wizard').then((token) => {
-        const payload = buildLeadPayload(data, { recaptchaToken: token, form: 'estimate_wizard' });
+        const extra = { recaptchaToken: token, form: 'estimate_wizard' };
+        for (const k in consent) extra[k] = consent[k];
+        const payload = buildLeadPayload(data, extra);
         return postLead(payload);
       }).then(() => {
         setTimeout(finish, 250);
